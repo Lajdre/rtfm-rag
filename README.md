@@ -53,7 +53,7 @@ devenv up # devenv up -d to do it in the background
     ```
   - or
     ```bash
-    python -m src.main # assuming venv is activated
+    python -m src.main # assuming virtual env is activated
     ```
 
 ### MCP
@@ -62,11 +62,22 @@ To start the MCP server:
 2. run:
   ```bash
   uv run -m src.mcp.mcp_server
-
   ```
 To test the server run (standalone script):
 ```bash
 uv run -m scripts.test_mcp_server
+```
+
+### Using a local model via [Ollama](https://github.com/ollama/ollama)
+1. Set Ollama as the generator model backend in .env:
+  - `GENERATOR_MODEL_PROVIDER=ollama`
+2. Optionally override the default Ollama settings:
+  - `OLLAMA_BASE_URL="http://localhost:11434"`
+  - `OLLAMA_MODEL="gemma3:270m"`
+3. Make sure Ollama is running and the chosen model is available:
+  ```bash
+  ollama serve
+  ollama pull gemma3:270m
   ```
 
 ### Local Processing
