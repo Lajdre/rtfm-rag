@@ -3,7 +3,7 @@ name = "rtfm-rag"
 version = "0.1.0"
 description = "rtfm-rag"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = "==3.12.*"
 dependencies = [
     "aiohttp>=3.12.7",
     "beautifulsoup4>=4.13.4",
