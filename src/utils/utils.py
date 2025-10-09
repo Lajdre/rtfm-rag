@@ -1,10 +1,13 @@
 from functools import lru_cache, wraps
 from time import perf_counter
-from typing import Any, Callable
+from typing import Any, Awaitable, Callable, ParamSpec, TypeVar
 
 import tiktoken
 
 from ..core.constants import rag
+
+P = ParamSpec("P")
+R = TypeVar("R")
 
 
 @lru_cache(maxsize=1)
@@ -16,9 +19,9 @@ def get_embed_token_count(text: str) -> int:
   return len(_get_embed_model_encoding().encode(text))
 
 
-def get_time(func: Callable) -> Callable:
+def get_time(func: Callable[P, R]) -> Callable[P, R]:
   @wraps(func)
-  def wrapper(*args, **kwargs) -> Any:
+  def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
     start_time: float = perf_counter()
     result: Any = func(*args, **kwargs)
     end_time: float = perf_counter()
@@ -29,9 +32,9 @@ def get_time(func: Callable) -> Callable:
   return wrapper
 
 
-def get_time_async(func: Callable) -> Callable:
+def get_time_async(func: Callable[P, Awaitable[R]]) -> Callable[P, Awaitable[R]]:
   @wraps(func)
-  async def wrapper(*args, **kwargs) -> Any:
+  async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
     start_time = perf_counter()
     result = await func(*args, **kwargs)
     end_time = perf_counter()
