@@ -59,6 +59,7 @@ in
     pkgs.atlas
     pkgs.flyway
     pkgs.podman
+    pkgs.ollama
   ];
   services.postgres = {
     enable = true;

@@ -1,5 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from .enums import GeneratorModelProvider
+
 
 class Config(BaseSettings):
   PROJECT_NAME: str = "RTFM RAG"
@@ -19,6 +21,10 @@ class Config(BaseSettings):
   LOG_LEVEL: str = "INFO"
   LOG_FILE: str | None = None
   LOG_FORMAT: str = "console"  # "json" or "console"
+
+  GENERATOR_MODEL_PROVIDER: GeneratorModelProvider = GeneratorModelProvider.openai
+  OLLAMA_BASE_URL: str = "http://localhost:11434"
+  OLLAMA_MODEL: str = "gemma3:270m"
 
   OPENAI_API_KEY: str = ""
 

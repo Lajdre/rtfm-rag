@@ -3,27 +3,31 @@ from typing import List
 from result import Err, Ok, Result
 
 from ..core.constants import rag
+from ..core.enums import GeneratorModelProvider
 from ..repositories.chunk_repository import ChunkRetriveData
+from ..services.ollama_service import generate_with_ollama
 from ..services.openai_service import get_openai_client
-from ..utils.utils import get_time
+from ..utils.utils import get_time_async
 
 
-@get_time
-def generate_response(query: str, chunks: List[ChunkRetriveData]) -> Result[str, str]:
-  # TODO: possibly utilize links
+@get_time_async
+async def generate_response(
+  query: str, chunks: List[ChunkRetriveData], model_provider: GeneratorModelProvider
+) -> Result[str, str]:
+  context = "\n\n".join(chunk.content for chunk in chunks)
+
+  full_prompt = rag.GENERATOR_USER_PROMPT_TEMPLATE.replace(
+    "{context}", context
+  ).replace("{user_query}", query)
+
+  print(full_prompt)
+
+  if model_provider == GeneratorModelProvider.ollama:
+    return await generate_with_ollama(full_prompt)
+
   openai_clinet_result = get_openai_client()
   if isinstance(openai_clinet_result, Err):
     return openai_clinet_result
-
-  context_list: List[str] = []
-  for chunk in chunks:
-    context_list.append(chunk.content)
-
-  context = "\n\n".join(context_list)
-
-  content = rag.GENERATOR_USER_PROMPT_TEMPLATE.replace("{context}", context).replace(
-    "{user_query}", query
-  )
 
   try:
     response = openai_clinet_result.ok().responses.create(
@@ -34,7 +38,7 @@ def generate_response(query: str, chunks: List[ChunkRetriveData]) -> Result[str,
       input=[
         {
           "role": "user",
-          "content": content,
+          "content": full_prompt,
         }
       ],
     )

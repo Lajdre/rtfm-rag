@@ -11,6 +11,7 @@ dependencies = [
     "fastapi[standard]>=0.115.12",
     "html2text>=2025.4.15",
     "mcp[cli]>=1.13.1",
+    "ollama>=0.6.0",
     "openai>=1.83.0",
     "psycopg[binary,pool]>=3.2.9",
     "pydantic-settings>=2.9.1",

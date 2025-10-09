@@ -5,6 +5,7 @@ from result import Err, Ok, Result, UnwrapError
 
 from ..api.v1.schemas import MessageResponseSchema, MessageSchema
 from ..core.constants import rag
+from ..core.enums import GeneratorModelProvider
 from ..repositories.chunk_repository import ChunkRetriveData, find_closest_chunks
 from ..repositories.index_repository import get_index_id_by_name
 from ..services.openai_service import get_openai_client
@@ -17,7 +18,9 @@ if TYPE_CHECKING:
 
 
 async def rag_pipeline(
-  message: MessageSchema, conn: AsyncConnection
+  message: MessageSchema,
+  generator_model_provider: GeneratorModelProvider,
+  conn: AsyncConnection,
 ) -> Result[MessageResponseSchema, str]:
   try:
     index_id: int | None = (
@@ -40,7 +43,9 @@ async def rag_pipeline(
       if chunk_data.distance < rag.MAX_RELEVANT_DISTANCE
     ]
 
-    response: str = generate_response(message.text, filtered_chunks).unwrap()
+    response: str = (
+      await generate_response(message.text, filtered_chunks, generator_model_provider)
+    ).unwrap()
 
     links: List[str] = list(set(chunk_data.url for chunk_data in filtered_chunks))
 
