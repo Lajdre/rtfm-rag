@@ -1,15 +1,20 @@
-# RTFM (Read The Friendly Manual) RAG Assistant (api)
+# {Read The Friendly Manual} RAG Assistant with MCP (api)
+
+Is your friendly neighbourhood LLM missing up-to-date context about a library or tool
+you're using in your project?
 
 ### Preview
 
 https://github.com/user-attachments/assets/35bf32ad-2967-460e-8fca-2bac859cb078
 
-1. Choose the documentation (index name) you want to embed into the assistant's knowledge base.
-2. Proceed with your questions.
+1. Paste a link to the library or tool documentation — the system will fetch, index,
+   and embed it into the assistant’s knowledge base.
+2. Dynamically select which indexed documentation to activate for your session,
+   then ask your questions and have conversations that leverage the chosen context.
 
 (UI is at - [repo](https://github.com/Asterikss/rtfm-rag-ui))
 
-### Embeddings Visualization
+### Example Embeddings Visualization
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/0ce34f6c-eb71-43db-a7a9-047844e930d0" alt="embeddings_visualization" width="560" height="460"/>
