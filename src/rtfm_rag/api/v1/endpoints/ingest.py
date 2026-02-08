@@ -16,7 +16,7 @@ router = APIRouter(prefix="/ingest")
 
 class IngestLinkSchema(BaseModel):
   url: HttpUrl
-  indexName: Annotated[
+  index_name: Annotated[
     str,
     StringConstraints(strip_whitespace=True, to_lower=True, pattern=r"^[A-Za-z0-9_]+$"),
   ]
@@ -39,12 +39,12 @@ async def _ingest_link(
   scraper = DocumentationScraper(scraper_config)
 
   scrape_result: Result[dict[Any, Any], str] = await scraper.scrape_website(
-    ingest_link_data.url, ingest_link_data.indexName
+    ingest_link_data.url, ingest_link_data.index_name
   )
   if isinstance(scrape_result, Err):
     return Err(scrape_result.err())
 
-  data_storage_result = await store_data(conn, ingest_link_data.indexName)
+  data_storage_result = await store_data(conn, ingest_link_data.index_name)
   if isinstance(data_storage_result, Err):
     return Err(data_storage_result.err())
 
@@ -61,7 +61,7 @@ async def _ingest_link(
 async def ingest_link(
   ingest_link_data: IngestLinkSchema,
   conn: Annotated[AsyncConnection, Depends(get_db_conn)],
-):
+) -> IngestLinkResponseSchema:
   try:
     result: Result[IngestLinkResponseSchema, str] = await _ingest_link(
       ingest_link_data, conn

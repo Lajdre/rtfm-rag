@@ -17,7 +17,7 @@ router = APIRouter()
 @router.post("/query", response_model=MessageResponseSchema)
 async def query(
   message_schema: MessageSchema, conn: Annotated[AsyncConnection, Depends(get_db_conn)]
-):
+) -> MessageResponseSchema:
   result: Result[MessageResponseSchema, str] = await rag_pipeline(
     message_schema, config.GENERATOR_MODEL_PROVIDER, conn
   )

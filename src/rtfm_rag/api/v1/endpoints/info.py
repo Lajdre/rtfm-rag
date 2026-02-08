@@ -14,8 +14,8 @@ router = APIRouter(prefix="/info")
 
 
 class IndexesInfoResponseSchema(BaseModel):
-  numberOfIndexes: int
-  indexesNames: list[str]
+  number_of_indexes: int
+  indexes_names: list[str]
 
 
 async def _get_indexes_info(
@@ -29,7 +29,7 @@ async def _get_indexes_info(
     case Ok(indexes_info):
       return Ok(
         IndexesInfoResponseSchema(
-          numberOfIndexes=indexes_info[0], indexesNames=indexes_info[1]
+          number_of_indexes=indexes_info[0], indexes_names=indexes_info[1]
         )
       )
     case Err(e):
@@ -37,7 +37,9 @@ async def _get_indexes_info(
 
 
 @router.get("/indexes", response_model=IndexesInfoResponseSchema)
-async def get_indexes_info(conn: Annotated[AsyncConnection, Depends(get_db_conn)]):
+async def get_indexes_info(
+  conn: Annotated[AsyncConnection, Depends(get_db_conn)],
+) -> IndexesInfoResponseSchema:
   try:
     match await _get_indexes_info(conn):
       case Ok(result):

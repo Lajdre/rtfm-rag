@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
 from psycopg import AsyncConnection
@@ -12,7 +12,9 @@ router = APIRouter()
 
 
 @router.get("/healthz")
-async def healthz(conn: Annotated[AsyncConnection, Depends(get_db_conn)]):
+async def healthz(
+  conn: Annotated[AsyncConnection, Depends(get_db_conn)],
+) -> dict[Any, Any]:
   async with conn.cursor() as cursor:
     await cursor.execute("SELECT 1")
     result = await cursor.fetchone()
@@ -20,5 +22,5 @@ async def healthz(conn: Annotated[AsyncConnection, Depends(get_db_conn)]):
 
 
 @router.get("/")
-async def read_root():
+async def read_root() -> dict[Any, Any]:
   return {f"{config.PROJECT_NAME}": "it is"}
