@@ -14,7 +14,7 @@ from mcp.server.session import ServerSession
 from psycopg import AsyncConnection
 from result import Err, Ok, Result
 
-from src.mcp.mcp_tools import fetch_docs_candidate_context_impl
+from src..mcp_tools import fetch_docs_candidate_context_impl
 from src.services.database_service import get_db_connection_string
 
 

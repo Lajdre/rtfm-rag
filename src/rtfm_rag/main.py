@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import asyncio
 from contextlib import asynccontextmanager
 
@@ -6,9 +7,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from psycopg_pool import AsyncConnectionPool
 
-from .api.v1.master_router import rounter
-from .core.config import config
-from .services.database_service import get_db_connection_string
+from rtfm_rag.api.v1.master_router import rounter
+from rtfm_rag.core.config import config
+from rtfm_rag.services.database_service import get_db_connection_string
 
 
 @asynccontextmanager
