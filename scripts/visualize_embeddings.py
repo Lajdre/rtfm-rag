@@ -1,16 +1,16 @@
 import ast
 import sys
+from typing import Any
 
 import dash
-from dash import Input, Output, dcc, html
 import numpy as np
 import pandas as pd
-import plotly.express as px
+import plotly.express as px  # pyright: ignore[reportMissingTypeStubs]
+import umap  # pyright: ignore[reportMissingTypeStubs]
+from dash import Input, Output, dcc, html
 from result import Err
-import umap
 
-from src.services.database_service import get_database_connection
-
+from rtfm_rag.services.database_service import get_database_connection
 
 app = dash.Dash(__name__)
 
@@ -32,24 +32,24 @@ def setup_data():
   cur.close()
   conn.close()
 
-  df = pd.DataFrame(
+  df = pd.DataFrame(  # pyright: ignore[reportUnknownVariableType]
     rows,
     columns=["id", "content", "embedding", "url", "index_id", "index_name"],  # type: ignore
   )
   df["embedding"] = df["embedding"].apply(
-    lambda x: np.array(ast.literal_eval(x), dtype=np.float32)
+    lambda x: np.array(ast.literal_eval(x), dtype=np.float32)  # pyright: ignore[reportUnknownLambdaType, reportUnknownArgumentType]
   )
-  embeddings = np.stack(df["embedding"].values)  # type: ignore
+  embeddings = np.stack(df["embedding"].values)  # type: ignore  # pyright: ignore[reportUnknownVariableType, reportUnknownArgumentType]
 
   # Dimensionality reduction
   reducer = umap.UMAP(n_components=3, random_state=42)
-  embedding_3d = reducer.fit_transform(embeddings)
-  df["x"] = embedding_3d[:, 0]  # type: ignore
-  df["y"] = embedding_3d[:, 1]  # type: ignore
-  df["z"] = embedding_3d[:, 2]  # type: ignore
+  embedding_3d = reducer.fit_transform(embeddings)  # pyright: ignore[reportUnknownVariableType]
+  df["x"] = embedding_3d[:, 0]  # type: ignore  # pyright: ignore[reportArgumentType, reportIndexIssue, reportCallIssue]
+  df["y"] = embedding_3d[:, 1]  # type: ignore  # pyright: ignore[reportArgumentType, reportIndexIssue, reportCallIssue]
+  df["z"] = embedding_3d[:, 2]  # type: ignore  # pyright: ignore[reportArgumentType, reportIndexIssue, reportCallIssue]
 
   fig = px.scatter_3d(
-    df,
+    df,  # pyright: ignore[reportUnknownArgumentType]
     x="x",
     y="y",
     z="z",
@@ -83,7 +83,7 @@ def setup_data():
 
 
 @app.callback(Output("chunk-info", "children"), Input("embedding-3d", "clickData"))
-def display_chunk_info(clickData):
+def display_chunk_info(clickData: Any):
   if clickData and "points" in clickData:
     point = clickData["points"][0]
     content = point["customdata"][0]

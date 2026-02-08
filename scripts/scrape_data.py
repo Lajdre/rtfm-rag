@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
 Script for scraping documentation pages and printing structured extraction results.
-Usage: python -m scripts.scrape_data <url> <index_name> [--debug] [--max-depth N] [--max-pages N]
+Usage: PYTHONPATH=src python -m scripts.scrape_data <url> <index_name> [--debug] [--max-depth N] [--max-pages N]
 """
 
 import argparse
 import asyncio
 import sys
+from typing import Any
 
-from typing import Dict
 from result import Err, Result
 
-from src.services.documentation_scraper import DocumentationScraper, ScraperConfig
+from rtfm_rag.services.documentation_scraper import DocumentationScraper, ScraperConfig
 
 
 async def scrape_and_print(
@@ -31,7 +31,9 @@ async def scrape_and_print(
   if debug:
     print(f"Running in DEBUG mode (max_depth={max_depth}, max_pages={max_pages})")
 
-  scrape_result: Result[Dict, str] = await scraper.scrape_website(url, index_name)
+  scrape_result: Result[dict[Any, Any], str] = await scraper.scrape_website(
+    url, index_name
+  )
   if isinstance(scrape_result, Err):
     print(f"Error occured: {scrape_result.err()}")
     sys.exit(1)

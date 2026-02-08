@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
 Quick-and-dirty MCP client for testing the server.
-Run from project root: python -m scripts.test_mcp_server
+Usage: python -m scripts.test_mcp_server
 """
 
 import asyncio
+
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from mcp.types import TextContent
@@ -13,7 +14,8 @@ from mcp.types import TextContent
 async def main():
   params = StdioServerParameters(
     command="python",
-    args=["-m", "src.mcp.mcp_server"],
+    args=["-m", "src.rtfm_rag.mcp.mcp_server"],
+    env={"PYTHONPATH": "src"},
   )
 
   async with stdio_client(params) as (read, write):

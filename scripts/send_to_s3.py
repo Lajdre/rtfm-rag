@@ -10,7 +10,7 @@ from pathlib import Path
 
 from result import Err, Result
 
-from src.services.s3_uploader import upload_to_s3
+from rtfm_rag.services.s3_uploader import upload_to_s3
 
 
 async def main():

@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """
 Script for storing scraped data in the database.
-Usage: python -m scripts.manual_ingest <index_name> [--debug] [--max-chunks N]
+Usage: PYTHONPATH=src python -m scripts.store_scraped_data <index_name> [--debug] [--max-chunks N]
 """
 
 import argparse
 import asyncio
 import sys
 
-from src.services.store_data import store_data
+import psycopg
+
+from rtfm_rag.services.database_service import get_db_connection_string
+from rtfm_rag.services.store_data import store_data
 
 
 async def main():
@@ -25,18 +28,25 @@ async def main():
   if args.debug:
     print(f"Running in DEBUG mode (max {args.max_chunks} chunks)")
 
-  result = await store_data(
-    args.index_name, debug_mode=args.debug, max_debug_chunks=args.max_chunks
+  conn: psycopg.AsyncConnection = await psycopg.AsyncConnection.connect(
+    get_db_connection_string()
   )
 
-  if result.is_ok():
-    stats = result.ok()
-    print("Data storage completed successfully")
-    print("Statistics:")
-    print(stats)
-  else:
-    print(f"Data storage failed: {result.err()}")
-    sys.exit(1)
+  try:
+    result = await store_data(
+      conn, args.index_name, debug_mode=args.debug, max_debug_chunks=args.max_chunks
+    )
+
+    if result.is_ok():
+      stats = result.ok()
+      print("Data storage completed successfully")
+      print("Statistics:")
+      print(stats)
+    else:
+      print(f"Data storage failed: {result.err()}")
+      sys.exit(1)
+  finally:
+    await conn.close()
 
 
 if __name__ == "__main__":
