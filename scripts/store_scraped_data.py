@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""
-Script for storing scraped data in the database.
+"""Script for storing scraped data in the database.
+
 Usage: PYTHONPATH=src python -m scripts.store_scraped_data <index_name> [--debug] [--max-chunks N]
 """
 
@@ -14,7 +14,7 @@ from rtfm_rag.services.database_service import get_db_connection_string
 from rtfm_rag.services.store_data import store_data
 
 
-async def main():
+async def main() -> None:
   parser = argparse.ArgumentParser(description="Ingest scraped data")
   parser.add_argument("index_name", help="Name of the index to ingest")
   parser.add_argument("--debug", action="store_true", help="Run in debug mode")

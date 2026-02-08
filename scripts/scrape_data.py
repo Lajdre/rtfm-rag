@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""
-Script for scraping documentation pages and printing structured extraction results.
+"""Script for scraping documentation pages and printing structured extraction results.
+
 Usage: PYTHONPATH=src python -m scripts.scrape_data <url> <index_name> [--debug] [--max-depth N] [--max-pages N]
 """
 
@@ -16,7 +16,7 @@ from rtfm_rag.services.documentation_scraper import DocumentationScraper, Scrape
 
 async def scrape_and_print(
   url: str, index_name: str, debug: bool, max_depth: int, max_pages: int
-):
+) -> None:
   config = ScraperConfig(
     max_depth=max_depth,
     max_pages=max_pages,
@@ -57,7 +57,7 @@ async def scrape_and_print(
         print(f"    Code blocks: {len(section.code_blocks)}")
 
 
-def main():
+def main() -> None:
   parser = argparse.ArgumentParser(description="Scrape documentation from a url")
   parser.add_argument("url", help="URL of the documentation to scrape")
   parser.add_argument("index_name", help="Index name for the documentation")

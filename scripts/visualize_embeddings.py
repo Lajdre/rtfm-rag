@@ -4,7 +4,7 @@ from typing import Any
 
 import dash
 import numpy as np
-import pandas as pd
+import pandas as pd  # pyright: ignore[reportMissingTypeStubs]
 import plotly.express as px  # pyright: ignore[reportMissingTypeStubs]
 import umap  # pyright: ignore[reportMissingTypeStubs]
 from dash import Input, Output, dcc, html
@@ -15,7 +15,7 @@ from rtfm_rag.services.database_service import get_database_connection
 app = dash.Dash(__name__)
 
 
-def setup_data():
+def setup_data() -> None:
   conn_result = get_database_connection()
   if isinstance(conn_result, Err):
     print(conn_result.err())
@@ -32,24 +32,24 @@ def setup_data():
   cur.close()
   conn.close()
 
-  df = pd.DataFrame(  # pyright: ignore[reportUnknownVariableType]
+  df = pd.DataFrame(
     rows,
-    columns=["id", "content", "embedding", "url", "index_id", "index_name"],  # type: ignore
+    columns=["id", "content", "embedding", "url", "index_id", "index_name"],  # type: ignore  # pyright: ignore[reportArgumentType]
   )
   df["embedding"] = df["embedding"].apply(
     lambda x: np.array(ast.literal_eval(x), dtype=np.float32)  # pyright: ignore[reportUnknownLambdaType, reportUnknownArgumentType]
   )
-  embeddings = np.stack(df["embedding"].values)  # type: ignore  # pyright: ignore[reportUnknownVariableType, reportUnknownArgumentType]
+  embeddings = np.stack(df["embedding"].values)  # type: ignore  # pyright: ignore[reportUnknownVariableType, reportCallIssue, reportArgumentType]
 
   # Dimensionality reduction
   reducer = umap.UMAP(n_components=3, random_state=42)
-  embedding_3d = reducer.fit_transform(embeddings)  # pyright: ignore[reportUnknownVariableType]
+  embedding_3d = reducer.fit_transform(embeddings)  # pyright: ignore[reportUnknownVariableType, reportUnknownArgumentType]
   df["x"] = embedding_3d[:, 0]  # type: ignore  # pyright: ignore[reportArgumentType, reportIndexIssue, reportCallIssue]
   df["y"] = embedding_3d[:, 1]  # type: ignore  # pyright: ignore[reportArgumentType, reportIndexIssue, reportCallIssue]
   df["z"] = embedding_3d[:, 2]  # type: ignore  # pyright: ignore[reportArgumentType, reportIndexIssue, reportCallIssue]
 
   fig = px.scatter_3d(
-    df,  # pyright: ignore[reportUnknownArgumentType]
+    df,
     x="x",
     y="y",
     z="z",
@@ -61,11 +61,11 @@ def setup_data():
   fig.update_layout(
     paper_bgcolor="#332726",
     plot_bgcolor="#332726",
-    scene=dict(
-      xaxis=dict(backgroundcolor="#332726"),
-      yaxis=dict(backgroundcolor="#332726"),
-      zaxis=dict(backgroundcolor="#332726"),
-    ),
+    scene={
+      "xaxis": {"backgroundcolor": "#332726"},
+      "yaxis": {"backgroundcolor": "#332726"},
+      "zaxis": {"backgroundcolor": "#332726"},
+    },
   )
 
   app.layout = html.Div(
@@ -83,7 +83,7 @@ def setup_data():
 
 
 @app.callback(Output("chunk-info", "children"), Input("embedding-3d", "clickData"))
-def display_chunk_info(clickData: Any):
+def display_chunk_info(clickData: Any) -> html.Div | str:
   if clickData and "points" in clickData:
     point = clickData["points"][0]
     content = point["customdata"][0]
