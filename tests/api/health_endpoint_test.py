@@ -1,7 +1,9 @@
 from unittest.mock import AsyncMock, MagicMock
 
-from src.main import app
-from src.services.database_service import get_db_conn
+from fastapi.testclient import TestClient
+
+from rtfm_rag.main import app
+from rtfm_rag.services.database_service import get_db_conn
 
 
 async def override_get_db_conn():
@@ -22,7 +24,7 @@ async def override_get_db_conn():
   yield mock_conn
 
 
-def test_healthz_endpint(get_client):
+def test_healthz_endpint(get_client: TestClient):
   app.dependency_overrides[get_db_conn] = override_get_db_conn
 
   response = get_client.get("/api/v1/healthz")
