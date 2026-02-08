@@ -37,3 +37,12 @@ reportExplicitAny = false
 
 [tool.ruff]
 indent-width = 2
+
+[tool.ruff.lint]
+select = ["A", "ANN", "ASYNC", "B", "C4", "D", "E", "ERA", "F", "G", "I", "ICN", "N", "PERF", "PL", "PT", "PTH", "RET", "RUF", "S", "SIM", "T10", "T20", "TID"]
+ignore = ["D100", "D101", "D102", "D103", "D104", "D107", "D213", "D203", "E501", "S311"]
+flake8-tidy-imports.ban-relative-imports = "all"
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/**.py" = ["T201"]
+"tests/**.py" = ["ERA001"]

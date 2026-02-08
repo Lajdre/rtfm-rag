@@ -1,5 +1,5 @@
 {
-  description = "FHS environment for Crawl4AI";
+  description = "FHS compatible environment for Crawl4AI";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
