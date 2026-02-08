@@ -1,7 +1,8 @@
 set dotenv-load
 
-ARGS_SERVE := env("_UV_RUN_ARGS_SERVE", "")
 PORT := env("SERVER_PORT", "8032")
+ARGS_SERVE := env("_UV_RUN_ARGS_SERVE", "")
+ARGS_TEST := env("_UV_RUN_ARGS_TEST", "")
 
 @_:
   just --list
@@ -11,7 +12,7 @@ PORT := env("SERVER_PORT", "8032")
 # Run development server
 [group('run')]
 serve:
-   uv run {{ ARGS_SERVE }} -m fastapi dev src/rtfm_rag/main.py --port {{ PORT }}
+  uv run {{ ARGS_SERVE }} -m fastapi dev src/rtfm_rag/main.py --port {{ PORT }}
 
 # Open development server in web browser
 [group('run')]
@@ -32,10 +33,17 @@ db-down:
 
 
 
+# Run tests
+[group('qa')]
+test *args:
+  PYTHONPATH=src uv run {{ ARGS_TEST }} -m pytest {{ args }}
+
+
+
 # Scrape data from a website. Usage: scrape <url> <index_name> [--debug] [--max-depth N] [--max-pages N]
 [group('scripts')]
 scrape url index_name *args:
-    PYTHONPATH=src uv run -m scripts.scrape_data {{url}} {{index_name}} {{args}}
+  PYTHONPATH=src uv run -m scripts.scrape_data {{url}} {{index_name}} {{args}}
 
 # Send scraped data to S3
 [group('scripts')]
