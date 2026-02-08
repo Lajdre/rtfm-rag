@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
+from psycopg import AsyncConnection
 from pydantic import BaseModel
 from result import Err, Ok, Result
 
@@ -10,9 +11,6 @@ from rtfm_rag.repositories.index_repository import get_indexes_state
 from rtfm_rag.services.database_service import get_db_conn
 
 router = APIRouter(prefix="/info")
-
-if TYPE_CHECKING:
-  from psycopg import AsyncConnection
 
 
 class IndexesInfoResponseSchema(BaseModel):

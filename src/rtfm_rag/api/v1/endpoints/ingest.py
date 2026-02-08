@@ -1,18 +1,15 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated, Any
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException
+from psycopg import AsyncConnection
 from pydantic import BaseModel, Field, HttpUrl, StringConstraints
 from result import Err, Ok, Result
 
 from rtfm_rag.services.database_service import get_db_conn
 from rtfm_rag.services.documentation_scraper import DocumentationScraper, ScraperConfig
 from rtfm_rag.services.store_data import store_data
-
-if TYPE_CHECKING:
-  from psycopg import AsyncConnection
-
 
 router = APIRouter(prefix="/ingest")
 

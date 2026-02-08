@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import Annotated
 
 from fastapi import APIRouter, Depends
+from psycopg import AsyncConnection
 
 from rtfm_rag.core.config import config
 from rtfm_rag.services.database_service import get_db_conn
-
-if TYPE_CHECKING:
-  from psycopg import AsyncConnection
 
 router = APIRouter()
 
