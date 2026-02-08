@@ -1,4 +1,4 @@
-# {Read The Friendly Manual} RAG Assistant with MCP (api)
+# {Read The Friendly Manual} RAG Assistant with MCP
 
 Is your friendly neighbourhood LLM missing up-to-date context about a library or tool
 you're using in your project?
