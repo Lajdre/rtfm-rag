@@ -1,13 +1,13 @@
 [project]
 name = "rtfm-rag"
 version = "0.1.0"
-description = "rtfm-rag"
 readme = "README.md"
 requires-python = "==3.12.*"
 dependencies = [
     "aiohttp>=3.12.7",
     "beautifulsoup4>=4.13.4",
     "boto3>=1.38.33",
+    "boto3-stubs[s3]>=1.42.44",
     "fastapi[standard]>=0.115.12",
     "html2text>=2025.4.15",
     "mcp[cli]>=1.13.1",
@@ -27,6 +27,13 @@ dev = [
     "pytest>=8.4.1",
     "umap-learn>=0.5.7",
 ]
+
+
+[tool.basedpyright]
+reportUnusedVariable = "hint"
+reportUnusedCallResult = false
+reportAny = false
+reportExplicitAny = false
 
 [tool.ruff]
 indent-width = 2
