@@ -1,13 +1,14 @@
 from __future__ import annotations
-from typing import List, TYPE_CHECKING
+
+from typing import TYPE_CHECKING
 
 from result import Err, Ok, Result, UnwrapError
 
-from ..core.constants import rag
-from ..rag.embedder import embed_data
-from ..repositories.chunk_repository import ChunkRetriveData, find_closest_chunks
-from ..repositories.index_repository import get_index_id_by_name
-from ..services.openai_service import get_openai_client
+from rtfm_rag.core.constants import rag
+from rtfm_rag.rag.embedder import embed_data
+from rtfm_rag.repositories.chunk_repository import ChunkRetriveData, find_closest_chunks
+from rtfm_rag.repositories.index_repository import get_index_id_by_name
+from rtfm_rag.services.openai_service import get_openai_client
 
 if TYPE_CHECKING:
   from openai import OpenAI
@@ -24,13 +25,13 @@ async def fetch_docs_candidate_context_impl(
 
     openai_client: OpenAI = get_openai_client().unwrap()
 
-    embedding: List[float] = (await embed_data(openai_client, query)).unwrap()
+    embedding: list[float] = (await embed_data(openai_client, query)).unwrap()
 
-    retrived_chunks: List[ChunkRetriveData] = (
+    retrived_chunks: list[ChunkRetriveData] = (
       await find_closest_chunks(conn, embedding, index_id)
     ).unwrap()
 
-    filtered_chunks: List[ChunkRetriveData] = [
+    filtered_chunks: list[ChunkRetriveData] = [
       chunk_data
       for chunk_data in retrived_chunks
       if chunk_data.distance < rag.MAX_RELEVANT_DISTANCE

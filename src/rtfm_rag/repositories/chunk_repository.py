@@ -1,15 +1,16 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import List, TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING
 
 from result import Err, Ok, Result
 
-from ..models.models import ChunkData
-from ..rag.embedder import embed_data
+from rtfm_rag.models.models import ChunkData
+from rtfm_rag.rag.embedder import embed_data
 
 if TYPE_CHECKING:
-  from psycopg import AsyncConnection
   from openai import OpenAI
+  from psycopg import AsyncConnection
 
 
 @dataclass
@@ -22,10 +23,10 @@ class ChunkRetriveData:
 
 async def find_closest_chunks(
   conn: AsyncConnection,
-  new_embedding: List[float],
+  new_embedding: list[float],
   index_id: int,
   top_k: int = 10,
-) -> Result[List[ChunkRetriveData], str]:
+) -> Result[list[ChunkRetriveData], str]:
   """
   Returns a list of ChunkRetriveData (chunk_id, distance, content) for k closest chunks.
   """
@@ -43,7 +44,7 @@ async def find_closest_chunks(
         (new_embedding, index_id, new_embedding, top_k),
       )
       rows = await cur.fetchall()
-      chunk_retrive_data_list: List[ChunkRetriveData] = [
+      chunk_retrive_data_list: list[ChunkRetriveData] = [
         ChunkRetriveData(id=row[0], distance=row[1], content=row[2], url=row[3])
         for row in rows
       ]
@@ -55,7 +56,7 @@ async def find_closest_chunks(
 async def _bare_insert_chunk(
   conn: AsyncConnection,
   content: str,
-  embedding: List[float],
+  embedding: list[float],
   url: str,
   index_id: int,
 ) -> Result[None, str]:
@@ -72,17 +73,17 @@ async def _bare_insert_chunk(
 
 async def insert_chunks(
   conn: AsyncConnection,
-  chunks: List[ChunkData],
+  chunks: list[ChunkData],
   openai_client: OpenAI,
   index_id: int,
-) -> Result[Tuple[int, int], str]:
+) -> Result[tuple[int, int], str]:
   chunks_inserted = 0
   chunks_failed = 0
 
   try:
     for chunk in chunks:
       # TODO: batching
-      embedding_result: Result[List[float], str] = await embed_data(
+      embedding_result: Result[list[float], str] = await embed_data(
         openai_client, chunk.content
       )
       if isinstance(embedding_result, Err):

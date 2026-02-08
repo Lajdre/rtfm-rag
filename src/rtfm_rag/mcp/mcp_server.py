@@ -7,15 +7,14 @@ Run with: python -m src.mcp.mcp_server
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from typing import Optional
 
 from mcp.server.fastmcp import Context, FastMCP
 from mcp.server.session import ServerSession
 from psycopg import AsyncConnection
 from result import Err, Ok, Result
 
-from src..mcp_tools import fetch_docs_candidate_context_impl
-from src.services.database_service import get_db_connection_string
+from rtfm_rag.mcp.mcp_tools import fetch_docs_candidate_context_impl
+from rtfm_rag.services.database_service import get_db_connection_string
 
 
 @dataclass
@@ -25,7 +24,7 @@ class AppContext:
 
 @asynccontextmanager
 async def lifespan(_: FastMCP) -> AsyncIterator[AppContext]:
-  conn: Optional[AsyncConnection] = None
+  conn: AsyncConnection | None = None
 
   try:
     print("Trying to connect to the database")

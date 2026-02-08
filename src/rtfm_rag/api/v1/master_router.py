@@ -1,10 +1,10 @@
 from fastapi import APIRouter
 
-from ...core.config import config
-from .endpoints.health import router as health_router
-from .endpoints.info import router as info_router
-from .endpoints.ingest import router as ingest_router
-from .endpoints.query import router as query_router
+from rtfm_rag.api.v1.endpoints.health import router as health_router
+from rtfm_rag.api.v1.endpoints.info import router as info_router
+from rtfm_rag.api.v1.endpoints.ingest import router as ingest_router
+from rtfm_rag.api.v1.endpoints.query import router as query_router
+from rtfm_rag.core.config import config
 
 rounter = APIRouter(prefix=config.API_V1_STR)
 

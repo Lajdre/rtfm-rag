@@ -1,12 +1,13 @@
 from __future__ import annotations
-from typing import List, TYPE_CHECKING, Tuple
+
+from typing import TYPE_CHECKING, Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from result import Err, Ok, Result
 
-from ....repositories.index_repository import get_indexes_state
-from ....services.database_service import get_db_conn
+from rtfm_rag.repositories.index_repository import get_indexes_state
+from rtfm_rag.services.database_service import get_db_conn
 
 router = APIRouter(prefix="/info")
 
@@ -16,13 +17,13 @@ if TYPE_CHECKING:
 
 class IndexesInfoResponseSchema(BaseModel):
   numberOfIndexes: int
-  indexesNames: List[str]
+  indexesNames: list[str]
 
 
 async def _get_indexes_info(
   conn: AsyncConnection,
 ) -> Result[IndexesInfoResponseSchema, str]:
-  indexes_info_result: Result[Tuple[int, List[str]], str] = await get_indexes_state(
+  indexes_info_result: Result[tuple[int, list[str]], str] = await get_indexes_state(
     conn
   )
 
@@ -38,7 +39,7 @@ async def _get_indexes_info(
 
 
 @router.get("/indexes", response_model=IndexesInfoResponseSchema)
-async def get_indexes_info(conn: AsyncConnection = Depends(get_db_conn)):
+async def get_indexes_info(conn: Annotated[AsyncConnection, Depends(get_db_conn)]):
   try:
     match await _get_indexes_info(conn):
       case Ok(result):

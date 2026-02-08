@@ -1,14 +1,14 @@
 from __future__ import annotations
-from typing import Annotated, Any, Dict, TYPE_CHECKING
+
+from typing import TYPE_CHECKING, Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, HttpUrl, StringConstraints
 from result import Err, Ok, Result
 
-from src.services.database_service import get_db_conn
-
-from ....services.documentation_scraper import DocumentationScraper, ScraperConfig
-from ....services.store_data import store_data
+from rtfm_rag.services.database_service import get_db_conn
+from rtfm_rag.services.documentation_scraper import DocumentationScraper, ScraperConfig
+from rtfm_rag.services.store_data import store_data
 
 if TYPE_CHECKING:
   from psycopg import AsyncConnection
@@ -28,8 +28,8 @@ class IngestLinkSchema(BaseModel):
 
 
 class IngestLinkResponseSchema(BaseModel):
-  scraping_summary: Dict[str, Any]
-  storage_summary: Dict[str, Any]
+  scraping_summary: dict[str, Any]
+  storage_summary: dict[str, Any]
   status: str
 
 
@@ -41,7 +41,7 @@ async def _ingest_link(
   )
   scraper = DocumentationScraper(scraper_config)
 
-  scrape_result: Result[Dict, str] = await scraper.scrape_website(
+  scrape_result: Result[dict[Any, Any], str] = await scraper.scrape_website(
     ingest_link_data.url, ingest_link_data.indexName
   )
   if isinstance(scrape_result, Err):
@@ -62,7 +62,8 @@ async def _ingest_link(
 
 @router.post("/link", response_model=IngestLinkResponseSchema)
 async def ingest_link(
-  ingest_link_data: IngestLinkSchema, conn: AsyncConnection = Depends(get_db_conn)
+  ingest_link_data: IngestLinkSchema,
+  conn: Annotated[AsyncConnection, Depends(get_db_conn)],
 ):
   try:
     result: Result[IngestLinkResponseSchema, str] = await _ingest_link(

@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import List, TYPE_CHECKING, Tuple
+
+from typing import TYPE_CHECKING
 
 from result import Err, Ok, Result
 
@@ -25,7 +26,7 @@ async def get_index_id_by_name(
 
 async def get_indexes_state(
   conn: AsyncConnection,
-) -> Result[Tuple[int, List[str]], str]:
+) -> Result[tuple[int, list[str]], str]:
   """Return a tuple: (number of indexes, list of index names)."""
   try:
     async with conn.cursor() as cur:

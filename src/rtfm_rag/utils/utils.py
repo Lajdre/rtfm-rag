@@ -1,10 +1,11 @@
+from collections.abc import Awaitable
 from functools import lru_cache, wraps
 from time import perf_counter
-from typing import Any, Awaitable, Callable, ParamSpec, TypeVar
+from typing import Any, Callable, ParamSpec, TypeVar
 
 import tiktoken
 
-from ..core.constants import rag
+from rtfm_rag.core.constants import rag
 
 P = ParamSpec("P")
 R = TypeVar("R")

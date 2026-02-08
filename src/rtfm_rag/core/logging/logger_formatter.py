@@ -37,7 +37,7 @@ class CustomJSONFormatter(logging.Formatter):
     fmt_keys: dict[str, str] | None = None,
   ):
     super().__init__()
-    self.fmt_keys = fmt_keys if fmt_keys is not None else {}
+    self.fmt_keys: dict[str, str] = fmt_keys if fmt_keys is not None else {}
 
   @override
   def format(self, record: logging.LogRecord) -> str:

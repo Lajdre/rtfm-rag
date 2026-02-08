@@ -1,18 +1,16 @@
-from typing import List
-
 from result import Err, Ok, Result
 
-from ..core.constants import rag
-from ..core.enums import GeneratorModelProvider
-from ..repositories.chunk_repository import ChunkRetriveData
-from ..services.ollama_service import generate_with_ollama
-from ..services.openai_service import get_openai_client
-from ..utils.utils import get_time_async
+from rtfm_rag.core.constants import rag
+from rtfm_rag.core.enums import GeneratorModelProvider
+from rtfm_rag.repositories.chunk_repository import ChunkRetriveData
+from rtfm_rag.services.ollama_service import generate_with_ollama
+from rtfm_rag.services.openai_service import get_openai_client
+from rtfm_rag.utils.utils import get_time_async
 
 
 @get_time_async
 async def generate_response(
-  query: str, chunks: List[ChunkRetriveData], model_provider: GeneratorModelProvider
+  query: str, chunks: list[ChunkRetriveData], model_provider: GeneratorModelProvider
 ) -> Result[str, str]:
   context = "\n\n".join(chunk.content for chunk in chunks)
 

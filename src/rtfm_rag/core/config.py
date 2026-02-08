@@ -1,6 +1,8 @@
+from typing import ClassVar
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from .enums import GeneratorModelProvider
+from rtfm_rag.core.enums import GeneratorModelProvider
 
 
 class Config(BaseSettings):
@@ -33,7 +35,7 @@ class Config(BaseSettings):
   AWS_S3_BUCKET_NAME: str = ""
   AWS_REGION: str = ""
 
-  model_config = SettingsConfigDict(env_file=".env")
+  model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(env_file=".env")
 
 
 config = Config()

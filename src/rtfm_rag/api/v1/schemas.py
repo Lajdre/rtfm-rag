@@ -1,4 +1,3 @@
-from typing import List
 from pydantic import BaseModel
 
 
@@ -10,4 +9,4 @@ class MessageSchema(BaseModel):
 
 class MessageResponseSchema(BaseModel):
   text: str
-  links: List[str]
+  links: list[str]

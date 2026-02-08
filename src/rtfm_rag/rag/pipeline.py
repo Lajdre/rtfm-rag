@@ -1,16 +1,17 @@
 from __future__ import annotations
-from typing import List, TYPE_CHECKING
+
+from typing import TYPE_CHECKING
 
 from result import Err, Ok, Result, UnwrapError
 
-from ..api.v1.schemas import MessageResponseSchema, MessageSchema
-from ..core.constants import rag
-from ..core.enums import GeneratorModelProvider
-from ..repositories.chunk_repository import ChunkRetriveData, find_closest_chunks
-from ..repositories.index_repository import get_index_id_by_name
-from ..services.openai_service import get_openai_client
-from .embedder import embed_data
-from .generator import generate_response
+from rtfm_rag.api.v1.schemas import MessageResponseSchema, MessageSchema
+from rtfm_rag.core.constants import rag
+from rtfm_rag.core.enums import GeneratorModelProvider
+from rtfm_rag.rag.embedder import embed_data
+from rtfm_rag.rag.generator import generate_response
+from rtfm_rag.repositories.chunk_repository import ChunkRetriveData, find_closest_chunks
+from rtfm_rag.repositories.index_repository import get_index_id_by_name
+from rtfm_rag.services.openai_service import get_openai_client
 
 if TYPE_CHECKING:
   from openai import OpenAI
@@ -31,13 +32,13 @@ async def rag_pipeline(
 
     openai_client: OpenAI = get_openai_client().unwrap()
 
-    embedding: List[float] = (await embed_data(openai_client, message.text)).unwrap()
+    embedding: list[float] = (await embed_data(openai_client, message.text)).unwrap()
 
-    retrived_chunks: List[ChunkRetriveData] = (
+    retrived_chunks: list[ChunkRetriveData] = (
       await find_closest_chunks(conn, embedding, index_id)
     ).unwrap()
 
-    filtered_chunks: List[ChunkRetriveData] = [
+    filtered_chunks: list[ChunkRetriveData] = [
       chunk_data
       for chunk_data in retrived_chunks
       if chunk_data.distance < rag.MAX_RELEVANT_DISTANCE
@@ -47,7 +48,7 @@ async def rag_pipeline(
       await generate_response(message.text, filtered_chunks, generator_model_provider)
     ).unwrap()
 
-    links: List[str] = list(set(chunk_data.url for chunk_data in filtered_chunks))
+    links: list[str] = list(set(chunk_data.url for chunk_data in filtered_chunks))
 
     return Ok(MessageResponseSchema(text=response, links=links))
   except UnwrapError as e:
