@@ -1,12 +1,14 @@
 from __future__ import annotations
-from functools import lru_cache
-from typing import AsyncGenerator, TYPE_CHECKING
 
-from fastapi import HTTPException, Request, status
+from collections.abc import AsyncGenerator
+from functools import lru_cache
+from typing import TYPE_CHECKING
+
 import psycopg
+from fastapi import HTTPException, Request, status
 from result import Err, Ok, Result
 
-from ..core.config import config
+from rtfm_rag.core.config import config
 
 if TYPE_CHECKING:
   from psycopg import AsyncConnection

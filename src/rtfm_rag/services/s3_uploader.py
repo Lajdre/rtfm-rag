@@ -2,6 +2,7 @@ from pathlib import Path
 
 import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
+from mypy_boto3_s3 import S3Client
 from result import Err, Ok, Result
 
 from ..core.config import config
@@ -20,7 +21,7 @@ async def upload_to_s3(target_dir: Path) -> Result[None, str]:
     )
 
   try:
-    s3 = boto3.client(
+    s3: S3Client = boto3.client(  # pyright: ignore[reportUnknownMemberType]
       "s3",
       aws_access_key_id=config.AWS_ACCESS_KEY_ID,
       aws_secret_access_key=config.AWS_SECRET_ACCESS_KEY,

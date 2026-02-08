@@ -1,16 +1,16 @@
 import asyncio
-from datetime import datetime
 import json
-from pathlib import Path
 import re
 import time
-from typing import Dict, List, Optional, Set
+from datetime import datetime
+from pathlib import Path
+from typing import Any, cast
 from urllib.parse import urljoin, urlparse, urlunparse
 
 import aiohttp
+import html2text
 from bs4 import BeautifulSoup, Tag
 from bs4.element import NavigableString
-import html2text
 from pydantic import BaseModel, HttpUrl
 from result import Err, Ok, Result
 
@@ -21,18 +21,18 @@ class ContentSection(BaseModel):
   type: str  # 'function', 'class', 'example', 'description', 'heading', etc.
   title: str
   content: str
-  code_blocks: List[str] = []
-  metadata: Dict = {}
+  code_blocks: list[str] = []
+  metadata: dict[Any, Any] = {}
 
 
 class ScrapedPage(BaseModel):
   url: str
   title: str
   raw_content: str  # Original markdown for fallback
-  structured_content: List[ContentSection] = []
+  structured_content: list[ContentSection] = []
   scraped_at: str
   depth: int
-  parent_url: Optional[str] = None
+  parent_url: str | None = None
   word_count: int = 0
   estimated_tokens: int = 0
 
@@ -46,8 +46,8 @@ class ScraperConfig(BaseModel):
   enable_structured_extraction: bool = True
   clean_code_blocks: bool = False
   remove_line_numbers: bool = False
-  include_patterns: List[str] = []
-  exclude_patterns: List[str] = [
+  include_patterns: list[str] = []
+  exclude_patterns: list[str] = [
     r".*\.(pdf|jpg|jpeg|png|gif|zip|tar|gz)$",
     r".*/api/.*",
     r".*/search.*",
@@ -58,13 +58,13 @@ class ScraperConfig(BaseModel):
 
 class DocumentationScraper:
   def __init__(self, config: ScraperConfig | None = None):
-    self.config = config or ScraperConfig()
-    self.visited_urls: Set[str] = set()
-    self.scraped_pages: List[ScrapedPage] = []
-    self.base_domain = ""
+    self.config: ScraperConfig = config or ScraperConfig()
+    self.visited_urls: set[str] = set()
+    self.scraped_pages: list[ScrapedPage] = []
+    self.base_domain: str = ""
     self.session: aiohttp.ClientSession | None = None
 
-    self.html_converter = html2text.HTML2Text()
+    self.html_converter: html2text.HTML2Text = html2text.HTML2Text()
     self.html_converter.ignore_links = False
     self.html_converter.ignore_images = True
     self.html_converter.ignore_emphasis = False
@@ -90,8 +90,8 @@ class DocumentationScraper:
 
     return text.strip()
 
-  def _extract_code_blocks(self, content: str) -> tuple[str, List[str]]:
-    code_blocks = []
+  def _extract_code_blocks(self, content: str) -> tuple[str, list[str]]:
+    code_blocks: list[str] = []
 
     # Find code blocks
     # Match an optional "language hint" right after the opening backticks
@@ -118,9 +118,9 @@ class DocumentationScraper:
 
     return content_without_code, code_blocks
 
-  def _detect_function_sections(self, soup: BeautifulSoup) -> List[ContentSection]:
+  def _detect_function_sections(self, soup: BeautifulSoup) -> list[ContentSection]:
     """Detect and extract function/method documentation sections"""
-    sections = []
+    sections: list[ContentSection] = []
 
     # Common selectors for API documentation
     function_selectors = [
@@ -146,15 +146,18 @@ class DocumentationScraper:
           for pattern in ["def ", "()", "function", "method", "class "]
         ):
           # Extract the section content
-          section_content = []
+          section_content: list[str] = []
           current = element
 
           # Collect content until next heading or function
           while current and current.next_sibling:
             current = current.next_sibling
             if isinstance(current, Tag):
+              classes = current.get("class")
+              class_list: list[str] = classes if isinstance(classes, list) else []
+
               if current.name in ["h1", "h2", "h3", "h4", "h5"] or any(
-                cls in current.get("class", [])
+                cls in class_list
                 for cls in ["doc-heading", "api-item", "method", "function"]
               ):
                 break
@@ -182,8 +185,8 @@ class DocumentationScraper:
 
     return sections
 
-  def _extract_structured_content(self, soup: BeautifulSoup) -> List[ContentSection]:
-    sections = []
+  def _extract_structured_content(self, soup: BeautifulSoup) -> list[ContentSection]:
+    sections: list[ContentSection] = []
 
     if not self.config.enable_structured_extraction:
       # Fallback to simple extraction
@@ -243,7 +246,7 @@ class DocumentationScraper:
       title = heading.get_text().strip()
 
       # Collect content until next heading
-      content_elements = []
+      content_elements: list[str] = []
       current = heading.next_sibling
 
       while current:
@@ -278,13 +281,17 @@ class DocumentationScraper:
           ):
             section_type = "api"
 
+          heading_level: str | None = None
+          if isinstance(heading, Tag):
+            heading_level = heading.name
+
           sections.append(
             ContentSection(
               type=section_type,
               title=title,
               content=content_without_code,
               code_blocks=code_blocks,
-              metadata={"heading_level": heading.name},
+              metadata={"heading_level": heading_level},
             )
           )
 
@@ -337,7 +344,7 @@ class DocumentationScraper:
 
     return True
 
-  def _extract_content(self, soup: BeautifulSoup, url: str) -> Dict:
+  def _extract_content(self, soup: BeautifulSoup) -> dict[Any, Any]:
     """Extract and structure content from HTML"""
 
     # Extract title
@@ -373,7 +380,9 @@ class DocumentationScraper:
     if not main_content:
       main_content = soup.find("body") or soup
 
-    structured_content = self._extract_structured_content(main_content)
+    structured_content = self._extract_structured_content(
+      cast(BeautifulSoup, main_content)
+    )
 
     # Create raw content for fallback
     raw_content = self.html_converter.handle(str(main_content))
@@ -392,12 +401,16 @@ class DocumentationScraper:
       "estimated_tokens": estimated_tokens,
     }
 
-  def _extract_links(self, soup: BeautifulSoup, base_url: str) -> List[str]:
+  def _extract_links(self, soup: BeautifulSoup, base_url: str) -> list[str]:
     """Extract valid links from the page"""
-    links = []
+    links: list[str] = []
 
-    for link in soup.find_all("a", href=True):
-      href = link["href"]
+    for element in soup.find_all("a", href=True):
+      if not isinstance(element, Tag):
+        continue
+      href = element.get("href")
+      if not isinstance(href, str):
+        continue
       absolute_url = urljoin(base_url, href)
       parsed = urlparse(absolute_url)
       clean_url = urlunparse(parsed._replace(fragment=""))
@@ -407,7 +420,10 @@ class DocumentationScraper:
 
     return list(set(links))
 
-  async def _fetch_page(self, url: str) -> Optional[BeautifulSoup]:
+  async def _fetch_page(self, url: str) -> BeautifulSoup | None:
+    if self.session is None:
+      return
+
     try:
       async with self.session.get(
         url, timeout=aiohttp.ClientTimeout(total=self.config.timeout)
@@ -423,8 +439,8 @@ class DocumentationScraper:
       return None
 
   async def _scrape_page(
-    self, url: str, depth: int = 0, parent_url: Optional[str] = None
-  ) -> Optional[ScrapedPage]:
+    self, url: str, depth: int = 0, parent_url: str | None = None
+  ) -> ScrapedPage | None:
     if url in self.visited_urls:
       return None
 
@@ -441,7 +457,7 @@ class DocumentationScraper:
     if not soup:
       return None
 
-    extracted = self._extract_content(soup, url)
+    extracted = self._extract_content(soup)
 
     scraped_page = ScrapedPage(
       url=url,
@@ -458,16 +474,16 @@ class DocumentationScraper:
     self.scraped_pages.append(scraped_page)
 
     print(
-      f"Extracted {len(extracted['structured_content'])} sections"
-      f"{extracted['word_count']} words"
-      f"~{extracted['estimated_tokens']} tokens"
+      f"Extracted {len(extracted['structured_content'])} sections "
+      + f"{extracted['word_count']} words "
+      + f"~{extracted['estimated_tokens']} tokens"
     )
 
     await asyncio.sleep(self.config.delay_between_requests)
     return scraped_page
 
   async def _scrape_recursively(
-    self, url: str, depth: int = 0, parent_url: Optional[str] = None
+    self, url: str, depth: int = 0, parent_url: str | None = None
   ):
     scraped_page = await self._scrape_page(url, depth, parent_url)
     if not scraped_page:
@@ -478,11 +494,11 @@ class DocumentationScraper:
     ):
       soup = await self._fetch_page(url)
       if soup:
-        links = self._extract_links(soup, url)
+        links: list[str] = self._extract_links(soup, url)
 
         semaphore = asyncio.Semaphore(3)
 
-        async def limited_scrape(link):
+        async def limited_scrape(link: str):
           async with semaphore:
             await self._scrape_recursively(link, depth + 1, url)
 
@@ -492,7 +508,7 @@ class DocumentationScraper:
 
         await asyncio.gather(*tasks)
 
-  def _save_to_disk(self, output_path: Path, base_url: str) -> Dict:
+  def _save_to_disk(self, output_path: Path, base_url: str) -> dict[Any, Any]:
     output_path.mkdir(parents=True, exist_ok=True)
 
     summary = {
@@ -547,11 +563,11 @@ class DocumentationScraper:
     index_name: str,
     send_to_bucket: bool = False,
     output_dir: str = "data",
-  ) -> Result[Dict, str]:
+  ) -> Result[dict[Any, Any], str]:
     base_url = str(base_url)
     output_path = Path(output_dir)
     output_path.mkdir(exist_ok=True)
-    summary = {}
+    summary: dict[Any, Any] = {}
 
     connector = aiohttp.TCPConnector(limit=10, limit_per_host=3)
     self.session = aiohttp.ClientSession(
@@ -576,7 +592,7 @@ class DocumentationScraper:
         f"Scraped {len(self.scraped_pages)} pages in {end_time - start_time:.2f} seconds"
       )
 
-      summary: Dict = self._save_to_disk(output_path, base_url)
+      summary = self._save_to_disk(output_path, base_url)
       if send_to_bucket:
         upload_result: Result[None, str] = await upload_to_s3(output_path)
         if isinstance(upload_result, Err):
@@ -586,5 +602,5 @@ class DocumentationScraper:
       await self.session.close()
       return Ok(summary)
 
-  def get_scraped_data(self) -> List[ScrapedPage]:
+  def get_scraped_data(self) -> list[ScrapedPage]:
     return self.scraped_pages

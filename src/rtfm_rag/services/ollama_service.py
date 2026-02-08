@@ -1,14 +1,21 @@
-from ollama import AsyncClient
+from collections.abc import Awaitable
+from typing import Callable, cast
+
+from ollama import AsyncClient, ChatResponse
 from result import Err, Ok, Result
 
-from ..core.config import config
-from ..core.constants import rag
+from rtfm_rag.core.config import config
+from rtfm_rag.core.constants import rag
 
 
 async def generate_with_ollama(prompt: str) -> Result[str, str]:
   try:
     client = AsyncClient(host=config.OLLAMA_BASE_URL)
-    response = await client.chat(
+    chat = cast(
+      Callable[..., Awaitable[ChatResponse]],
+      client.chat,
+    )
+    response: ChatResponse = await chat(
       model=config.OLLAMA_MODEL,
       messages=[
         {"role": "system", "content": rag.GENERATOR_SYSTEM_PROMPT},

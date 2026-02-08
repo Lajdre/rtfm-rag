@@ -3,7 +3,7 @@ from functools import lru_cache
 from openai import OpenAI
 from result import Err, Ok, Result
 
-from ..core.config import config
+from rtfm_rag.core.config import config
 
 
 @lru_cache(maxsize=1)

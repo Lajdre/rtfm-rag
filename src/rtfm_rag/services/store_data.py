@@ -2,16 +2,16 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
 from result import Err, Ok, Result
 
-from ..models.models import ChunkData
-from ..repositories.chunk_repository import insert_chunks
-from ..repositories.index_repository import check_index_exists, create_index
-from ..services.openai_service import get_openai_client
-from ..utils.utils import get_embed_token_count
+from rtfm_rag.models.models import ChunkData
+from rtfm_rag.repositories.chunk_repository import insert_chunks
+from rtfm_rag.repositories.index_repository import check_index_exists, create_index
+from rtfm_rag.services.openai_service import get_openai_client
+from rtfm_rag.utils.utils import get_embed_token_count
 
 if TYPE_CHECKING:
   from openai import OpenAI
@@ -30,13 +30,13 @@ class StorageStatistics(BaseModel):
   source_url: str
 
 
-def _chunk_content(content: str, max_chars: int = 2000) -> List[str]:
+def _chunk_content(content: str, max_chars: int = 2000) -> list[str]:
   """Split content into smaller chunks if needed."""
   # TODO: make this better
   if len(content) <= max_chars:
     return [content]
 
-  chunks = []
+  chunks: list[str] = []
   words = content.split()
   current_chunk = []
   current_length = 0
@@ -57,13 +57,13 @@ def _chunk_content(content: str, max_chars: int = 2000) -> List[str]:
   return chunks
 
 
-def _process_json_file(file_path: Path) -> Result[List[ChunkData], str]:
+def _process_json_file(file_path: Path) -> Result[list[ChunkData], str]:
   """Process a single JSON file and return chunk data."""
   try:
     with open(file_path, "r", encoding="utf-8") as f:
       data = json.load(f)
 
-    chunks = []
+    chunks: list[ChunkData] = []
     page_title = data.get("title", "")
     structured_content = data.get("structured_content", [])
     url = data.get("url", str(file_path))
@@ -122,22 +122,22 @@ def _process_json_file(file_path: Path) -> Result[List[ChunkData], str]:
     return Err(f"Failed to process file {file_path}: {e}")
 
 
-def _find_json_files(data_dir: Path) -> List[Path]:
+def _find_json_files(data_dir: Path) -> list[Path]:
   """Recursively find all JSON files except settings.json."""
-  json_files = []
+  json_files: list[Path] = []
   for file_path in data_dir.rglob("*.json"):
     if file_path.name != "settings.json":
       json_files.append(file_path)
   return json_files
 
 
-def _calculate_mode(values: List[int]) -> int:
+def _calculate_mode(values: list[int]) -> int:
   if not values:
     return 0
   return max(set(values), key=values.count)
 
 
-def _write_debug_chunks(chunks: List[ChunkData], index_name: str) -> None:
+def _write_debug_chunks(chunks: list[ChunkData], index_name: str) -> None:
   debug_dir = Path("logs")
   debug_dir.mkdir(exist_ok=True)
 
@@ -182,11 +182,11 @@ async def store_data(
       return Err(f"No JSON files found in {data_dir}")
 
     # Process all files and collect chunks
-    all_chunks: List[ChunkData] = []
+    all_chunks: list[ChunkData] = []
     files_processed = 0
 
     for json_file in json_files:
-      process_result: Result[List[ChunkData], str] = _process_json_file(json_file)
+      process_result: Result[list[ChunkData], str] = _process_json_file(json_file)
       if isinstance(process_result, Err):
         # logger.warning(f"Skipping file {json_file}: {process_result.err()}")
         continue
@@ -245,7 +245,7 @@ async def store_data(
       )
       return Ok(stats)
 
-    openai_client_result: Result = get_openai_client()
+    openai_client_result: Result[OpenAI, str] = get_openai_client()
     if isinstance(openai_client_result, Err):
       return openai_client_result
     openai_client: OpenAI = openai_client_result.ok()
@@ -258,7 +258,7 @@ async def store_data(
 
     index_id: int = create_index_result.ok()
 
-    insert_chunks_res: Result[Tuple[int, int], str] = await insert_chunks(
+    insert_chunks_res: Result[tuple[int, int], str] = await insert_chunks(
       conn, all_chunks, openai_client, index_id
     )
     if isinstance(insert_chunks_res, Err):
