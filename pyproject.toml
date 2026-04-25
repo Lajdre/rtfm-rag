@@ -34,6 +34,7 @@ reportUnusedVariable = "hint"
 reportUnusedCallResult = false
 reportAny = false
 reportExplicitAny = false
+reportUnknownMemberType = false
 
 [tool.ruff]
 indent-width = 2
@@ -45,4 +46,4 @@ flake8-tidy-imports.ban-relative-imports = "all"
 
 [tool.ruff.lint.per-file-ignores]
 "scripts/**.py" = ["T201"]
-"tests/**.py" = ["ERA001"]
+"tests/**.py" = ["ERA001", "S101", "ANN201"]
